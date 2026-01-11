@@ -1,0 +1,23 @@
+- hosts: raspberrypi
+  become: true
+  vars:
+    ansible_user_name: ansible
+  tasks:
+    - name: Ensure ansible user exists
+      user:
+        name: "{{ ansible_user_name }}"
+        groups: sudo
+        shell: /bin/bash
+        state: present
+    - name: Allow passwordless sudo for ansible user
+      copy:
+        dest: "/etc/sudoers.d/{{ ansible_user_name }}"
+        content: "{{ ansible_user_name }} ALL=(ALL) NOPASSWD:ALL\n"
+        owner: root
+        group: root
+        mode: '0440'
+    - name: Set up authorized key for ansible user
+      authorized_key:
+        user: "{{ ansible_user_name }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
