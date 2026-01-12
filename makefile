@@ -1,8 +1,10 @@
-.PHONY: all playbooks
+.PHONY: all install-collections playbooks
 
 playbooks:
-	for pb in playbooks/*.yaml; do \
-		ansible-playbook -i playbooks/inventory.ini $$pb; \
-	done
+	ansible-playbook \
+		-i playbooks/inventory.ini \
+		playbooks/setup-raspberry-pi-node.yaml  
+install-collections:
+	ansible-galaxy collection install community.general
 
-all: playbooks
+all: playbooks install-collections

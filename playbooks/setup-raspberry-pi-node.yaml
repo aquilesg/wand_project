@@ -1,0 +1,3 @@
+- import_playbook: ./setup-playbooks/bootstrap-ansible-user.yaml
+- import_playbook: ./setup-playbooks/install-homebridge.yaml
+- import_playbook: ./setup-playbooks/setup-homebridge-plugins.yaml

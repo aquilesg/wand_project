@@ -1,4 +1,4 @@
-- hosts: raspberrypi
+- hosts: all
   become: true
   vars:
     ansible_user_name: ansible

@@ -1,0 +1,36 @@
+- hosts: all
+  become: true
+  remote_user: ansible
+  tasks:
+    - name: Download Homebridge GPG key
+      ansible.builtin.get_url:
+        url: https://repo.homebridge.io/KEY.gpg
+        dest: /tmp/homebridge.gpg
+        mode: '0644'
+    - name: Convert Homebridge GPG key to dearmored format
+      ansible.builtin.command: >
+        gpg --dearmor -o /tmp/homebridge.gpg.dearmored /tmp/homebridge.gpg
+
+      args:
+        creates: /tmp/homebridge.gpg.dearmored
+    - name: Move dearmored key to /usr/share/keyrings
+      ansible.builtin.copy:
+        src: /tmp/homebridge.gpg.dearmored
+        dest: /usr/share/keyrings/homebridge.gpg
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: true
+    - name: Add Homebridge APT repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/homebridge.gpg] https://repo.homebridge.io stable main"
+        filename: homebridge
+        state: present
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+    - name: Install Homebridge
+      ansible.builtin.apt:
+        name:
+          - homebridge
+        state: present

@@ -1,0 +1,32 @@
+{
+  "bridge": {
+    "name": "Homebridge 267E",
+    "username": "0E:84:19:1E:26:7E",
+    "port": 51182,
+    "pin": "875-03-514",
+    "advertiser": "avahi"
+  },
+  "accessories": [],
+  "platforms": [
+    {
+      "name": "Config",
+      "port": 8581,
+      "platform": "config"
+    },
+    {
+      "name": "TplinkSmarthome",
+      "addCustomCharacteristics": true,
+      "deviceTypes": [
+        "plug",
+        "bulb"
+      ],
+      "devicesUseDiscoveryPort": false,
+      "platform": "TplinkSmarthome",
+      "_bridge": {
+        "username": "0E:1C:13:42:7C:D0",
+        "port": 55371,
+        "name": "Homebridge TPLink Smarthome"
+      }
+    }
+  ]
+}
