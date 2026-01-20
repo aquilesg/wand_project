@@ -8,10 +8,9 @@
           - npm
         state: present
     - name: Install TPLink Plugin
-      ansible.builtin.npm:
-        name: homebridge-tplink-smarthome
-        global: true
-        state: present
+      ansible.builtin.command:
+        cmd: hb-service add homebridge-tplink-smarthome
+      changed_when: false
     - name: Copy over the config file to target location
       ansible.builtin.copy:
         src: ../../homebridge-configs/config.json
