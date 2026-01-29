@@ -13,7 +13,7 @@
       changed_when: false
     - name: Copy over the config file to target location
       ansible.builtin.copy:
-        src: ../../homebridge-configs/config.json
+        src: ../configs/config.json
         dest: /var/lib/homebridge/config.json
         owner: ansible
         group: ansible

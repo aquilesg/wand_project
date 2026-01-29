@@ -1,7 +1,9 @@
 
 # Raspberry Pi Ansible User Setup
 
-This guide explains how to prepare your Raspberry Pi for Ansible automation by creating a dedicated user account with passwordless sudo and SSH key authentication.
+This guide explains how to prepare your Raspberry Pi for Ansible automation by
+creating a dedicated user account with passwordless sudo and SSH key
+authentication.
 
 ## 1. Initial Access
 
@@ -17,6 +19,18 @@ This guide explains how to prepare your Raspberry Pi for Ansible automation by c
 [raspberrypi]
 192.168.68.54 ansible_user=ansible
 ```
+
+Future setups are done through `makefiles`,
+
+```sh
+make all
+# Open this in the browser
+http://raspberrypi1.local:5000
+```
+
+### Accessing Camera Through Local network
+
+You can access the
 
 ## Intent
 
@@ -50,4 +64,31 @@ sequenceDiagram
         n ->> h: Forward Request
         h ->> p: Trigger
     end
+```
+
+#### Wand Interaction
+
+The wand interaction needs to have a few moving parts:
+
+- A way to teach it movements
+- A way to check taught movements against inputs
+- Direct specific movements towards specific API inputs
+
+```mermaid
+---
+title: Teaching new movements
+---
+sequenceDiagram
+    actor a as Child
+    participant c as Camera
+    participant r as RaspberryPi
+
+    a -->> c: Training gesture
+    c -->> r: Initiate training
+    loop Every 10 seconds
+        a ->> c: Movement
+        c ->> r: Store movement
+        r ->> a: Audio queue
+    end
+
 ```
