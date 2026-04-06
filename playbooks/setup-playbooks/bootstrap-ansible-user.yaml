@@ -2,11 +2,15 @@
   become: true
   vars:
     ansible_user_name: ansible
+    nvim_repo: "https://github.com/aquilesg/nvim.git"
   tasks:
     - name: Ensure ansible user exists
       user:
         name: "{{ ansible_user_name }}"
-        groups: sudo
+        groups:
+          - sudo
+          - video
+          - render
         shell: /bin/bash
         state: present
     - name: Allow passwordless sudo for ansible user
@@ -21,3 +25,36 @@
         user: "{{ ansible_user_name }}"
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    - name: Pull Neovim Dependencies
+      block:
+        - name: Install Neovim dependencies
+          apt:
+            name:
+              - git
+              - curl
+              - unzip
+              - ripgrep
+              - fd-find
+              - neovim
+              - lazygit
+              - gh
+            state: present
+            update_cache: true
+    - name: Setup GitHub Token Credentials
+      ansible.builtin.lineinfile:
+        path: "/home/{{ ansible_user_name }}/.bashrc"
+        line: 'export GITHUB_TOKEN={{ lookup("env", "RASPBERRY_PI_GITHUB_TOKEN") }}'
+        create: yes
+      become_user: "{{ ansible_user_name }}"
+    - name: Clone Configuration for Neovim
+      ansible.builtin.git:
+        repo: "{{ nvim_repo }}"
+        dest: "/home/{{ ansible_user_name }}/.config/nvim"
+        version: master
+      become_user: "{{ ansible_user_name }}"
+    - name: Install Neovim plugins headlessly (lazy.nvim)
+      command: nvim --headless "+Lazy! sync" +qa
+      become_user: "{{ ansible_user_name }}"
+      environment:
+        HOME: "/home/{{ ansible_user_name }}"
+      timeout: 300

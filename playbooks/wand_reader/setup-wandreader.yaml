@@ -1,0 +1,56 @@
+- name: Deploy wand_reader to Raspberry Pi
+  hosts: all
+  become: yes
+  vars:
+    deploy_path: /opt/wand_reader
+    service_name: wand_reader.service
+    ansible_user_name: ansible
+  tasks:
+    - name: Ensure deploy directory exists
+      ansible.builtin.file:
+        path: "{{ deploy_path }}"
+        state: directory
+        owner: "{{ ansible_user_name }}"
+        mode: '0755'
+    - name: Sync wand_reader source
+      ansible.builtin.synchronize:
+        src: "../wand_reader/"
+        dest: "{{ deploy_path }}/"
+        recursive: yes
+        delete: yes
+        rsync_opts:
+          - "--exclude=__pycache__"
+          - "--exclude=*.pyc"
+    - name: Copy over requirements file
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../requirements.txt"
+        dest: "{{ deploy_path }}/requirements.txt"
+        owner: "{{ ansible_user_name }}"
+        mode: '0644'
+    - name: Install dependencies system-wide
+      ansible.builtin.pip:
+        requirements: "{{ deploy_path }}/requirements.txt"
+        executable: pip3
+        extra_args: "--break-system-packages --ignore-installed"
+    - name: Deploy systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/{{ service_name }}
+        content: |
+          [Unit]
+          Description=Wand Reader
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/bin/python3 {{ deploy_path }}/main.py
+          WorkingDirectory={{ deploy_path }}
+          Restart=always
+          User=ansible
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Reload systemd and restart service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        enabled: yes
+        state: restarted
+        daemon_reload: yes

@@ -3,8 +3,7 @@
 playbooks:
 	ansible-playbook \
 		-i ./playbooks/inventory.ini \
-		./playbooks/setup-raspberry-pi-node.yaml \
-		./playbooks/setup_wand_reader/create_app_stream.yaml
+		./playbooks/setup-raspberry-pi-node.yaml
 install-collections:
 	ansible-galaxy collection install community.general
 
@@ -16,25 +15,23 @@ setup-python:
 requirements:
 	venv/bin/pip freeze > requirements.txt
 .PHONY: setup-camera
-setup-camera:
-	ansible-playbook \
-		-i ./playbooks/inventory.ini \
-		./playbooks/setup_wand_reader/create_app_stream.yaml
 
-all: playbooks install-collections setup-camera
+all: playbooks install-collections 
 
 PI_HOST = ansible@raspberrypi1.local
 
-.PHONY: debug follow restart
+.PHONY: deploy
+deploy:
+	ansible-playbook \
+		-i ./playbooks/inventory.ini \
+		./playbooks/wand_reader/setup-wandreader.yaml
+	$(MAKE) follow
 
-# Runs the debug command once and exits
-debug:
-	ssh $(PI_HOST) "sudo journalctl -u camera.service -n 50 --no-pager"
-
-# Streams the logs in real-time (Ctrl+C to stop)
 follow:
-	ssh $(PI_HOST) "sudo journalctl -u camera.service -f"
+	ssh $(PI_HOST) "sudo journalctl -u wand_reader.service -f"
 
-# Restarts the service and then follows the logs
 restart:
-	ssh $(PI_HOST) "sudo systemctl restart camera.service && sudo journalctl -u camera.service -f"
+	ssh $(PI_HOST) "sudo systemctl restart wand_reader.service"
+
+debug:
+	ssh $(PI_HOST) "sudo journalctl -u wand_reader.service -n 50 --no-pager"
