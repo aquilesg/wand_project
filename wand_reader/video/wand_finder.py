@@ -14,6 +14,7 @@ class Detector():
         brightness_threshold: int = 220,
         min_area: float = 10.0,
         max_area: float = 5000.0,
+        snapshot_path: Optional[str] = None,
     ):
         self.brightness_threshold = brightness_threshold
         self.min_area = min_area
@@ -28,7 +29,7 @@ class Detector():
     )
             self.cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
             logger.info("Starting Pi Camera via GStreamer")
-        if not self.__check_camera():
+        if not self.__check_camera(snapshot_path):
             raise RuntimeError("Camera check failed, aborting.")
 
     def __enter__(self) -> "Detector":
@@ -75,7 +76,7 @@ class Detector():
         return (best[0], best[1])
 
 
-    def __check_camera(self) -> bool:
+    def __check_camera(self, snapshot_path: Optional[str] = None) -> bool:
         if not self.cap.isOpened():
             logger.error("Camera is not opened")
             return False
@@ -89,6 +90,11 @@ class Detector():
 
         h, w = frame.shape[:2]
         logger.info(f"Camera operational — resolution: {w}x{h}")
+
+        if snapshot_path:
+            cv2.imwrite(snapshot_path, frame)
+            logger.info(f"Startup snapshot saved to: {snapshot_path}")
+
         return True
 
     def release(self):

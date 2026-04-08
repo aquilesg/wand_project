@@ -35,3 +35,7 @@ restart:
 
 debug:
 	ssh $(PI_HOST) "sudo journalctl -u wand_reader.service -n 50 --no-pager"
+
+get_snapshot:
+	scp $(PI_HOST):/tmp/wand_startup.jpg ~/Desktop/
+	open ~/Desktop/wand_startup.jpg

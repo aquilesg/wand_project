@@ -5,6 +5,8 @@ import sys
 import logging
 from video import wand_finder
 
+SNAPSHOT_PATH="/tmp/wand_startup.jpg"
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.DEBUG,
@@ -17,7 +19,7 @@ class WandReader:
         logger.info("starting main process init")
         #TODO: I need to eventually enable this self.homekit_api = homebridge.HomebridgeAPI()
     def start(self) -> None:
-        with wand_finder.Detector(camera_index=0) as detector:
+        with wand_finder.Detector(camera_index=0, snapshot_path=SNAPSHOT_PATH) as detector:
             while True:
                 logger.info("starting detection loop")
                 position = detector.check_for_wand_spot()
